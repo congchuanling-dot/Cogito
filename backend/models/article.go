@@ -12,7 +12,6 @@ type Category struct {
 	Slug      string         `gorm:"size:100;uniqueIndex;not null" json:"slug"`
 	CreatedAt time.Time      `json:"created_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Articles  []Article      `gorm:"foreignKey:CategoryID" json:"-"`
 }
 
 type Tag struct {
@@ -21,7 +20,6 @@ type Tag struct {
 	Slug      string         `gorm:"size:100;uniqueIndex;not null" json:"slug"`
 	CreatedAt time.Time      `json:"created_at"`
 	DeletedAt gorm.DeletedAt `gorm:"index" json:"-"`
-	Articles  []Article      `gorm:"many2many:article_tags" json:"-"`
 }
 
 type Article struct {
@@ -30,9 +28,9 @@ type Article struct {
 	Slug       string         `gorm:"size:255;uniqueIndex;not null" json:"slug"`
 	Content    string         `gorm:"type:text;not null" json:"content"`
 	Excerpt    string         `gorm:"size:500" json:"excerpt"`
-	CategoryID uint           `json:"category_id"`
-	Category   *Category      `gorm:"foreignKey:CategoryID" json:"category,omitempty"`
-	Tags       []Tag          `gorm:"many2many:article_tags" json:"tags,omitempty"`
+	CategoryID *uint          `json:"category_id"`
+	Category   *Category      `gorm:"foreignKey:CategoryID;references:ID;constraint:false" json:"category,omitempty"`
+	Tags       []Tag          `gorm:"many2many:article_tags;foreignKey:ID;joinForeignKey:ArticleID;references:ID;joinReferences:TagID;constraint:false" json:"tags,omitempty"`
 	Published  bool           `gorm:"default:false" json:"published"`
 	CreatedAt  time.Time      `json:"created_at"`
 	UpdatedAt  time.Time      `json:"updated_at"`
