@@ -1,6 +1,7 @@
 package handlers
 
 import (
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -73,7 +74,7 @@ type CreateArticleInput struct {
 	Title      string `json:"title" binding:"required"`
 	Content    string `json:"content" binding:"required"`
 	Excerpt    string `json:"excerpt"`
-	CategoryID uint   `json:"category_id"`
+	CategoryID *uint  `json:"category_id"`
 	TagIDs     []uint `json:"tag_ids"`
 	Published  bool   `json:"published"`
 }
@@ -85,13 +86,17 @@ func CreateArticle(c *gin.Context) {
 		return
 	}
 
+	articleSlug := uniqueSlug(slug.Make(input.Title))
+
 	article := models.Article{
-		Title:      input.Title,
-		Slug:       slug.Make(input.Title),
-		Content:    input.Content,
-		Excerpt:    input.Excerpt,
-		CategoryID: input.CategoryID,
-		Published:  input.Published,
+		Title:     input.Title,
+		Slug:      articleSlug,
+		Content:   input.Content,
+		Excerpt:   input.Excerpt,
+		Published: input.Published,
+	}
+	if input.CategoryID != nil && *input.CategoryID > 0 {
+		article.CategoryID = input.CategoryID
 	}
 
 	if len(input.TagIDs) > 0 {
@@ -113,7 +118,7 @@ type UpdateArticleInput struct {
 	Title      string `json:"title"`
 	Content    string `json:"content"`
 	Excerpt    string `json:"excerpt"`
-	CategoryID uint   `json:"category_id"`
+	CategoryID *uint  `json:"category_id"`
 	TagIDs     []uint `json:"tag_ids"`
 	Published  *bool  `json:"published"`
 }
@@ -140,7 +145,7 @@ func UpdateArticle(c *gin.Context) {
 	updates := map[string]interface{}{}
 	if input.Title != "" {
 		updates["title"] = input.Title
-		updates["slug"] = slug.Make(input.Title)
+		updates["slug"] = uniqueSlug(slug.Make(input.Title))
 	}
 	if input.Content != "" {
 		updates["content"] = input.Content
@@ -148,8 +153,8 @@ func UpdateArticle(c *gin.Context) {
 	if input.Excerpt != "" {
 		updates["excerpt"] = input.Excerpt
 	}
-	if input.CategoryID > 0 {
-		updates["category_id"] = input.CategoryID
+	if input.CategoryID != nil {
+		updates["category_id"] = *input.CategoryID
 	}
 	if input.Published != nil {
 		updates["published"] = *input.Published
@@ -201,4 +206,16 @@ func SearchArticles(c *gin.Context) {
 		Find(&articles)
 
 	c.JSON(http.StatusOK, gin.H{"articles": articles, "total": len(articles)})
+}
+
+func uniqueSlug(base string) string {
+	s := base
+	for i := 2; ; i++ {
+		var count int64
+		database.DB.Unscoped().Model(&models.Article{}).Where("slug = ?", s).Count(&count)
+		if count == 0 {
+			return s
+		}
+		s = slug.Make(fmt.Sprintf("%s-%d", base, i))
+	}
 }

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Path \"G:\\\\beliveOnly\\\\Cogito\\\\backend\" -Depth 3 -Directory)",
+      "Bash(Select-Object FullName)",
+      "Bash(Get-ChildItem -Path \"G:\\\\beliveOnly\\\\Cogito\\\\backend\" -File -Recurse)",
+      "Bash(Select-Object FullName, Length)",
+      "PowerShell(Get-ChildItem -Path \"G:\\\\beliveOnly\\\\Cogito\\\\backend\" -Directory -Recurse -Depth 3 | ForEach-Object { $_.FullName })",
+      "PowerShell(Get-ChildItem -Path \"G:\\\\beliveOnly\\\\Cogito\\\\backend\" -File -Recurse | ForEach-Object { \"$\\($_.FullName\\) \\($\\($_.Length\\) bytes\\)\" })"
+    ]
+  }
+}

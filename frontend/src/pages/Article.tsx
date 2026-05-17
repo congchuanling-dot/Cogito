@@ -2,8 +2,11 @@ import { useEffect, useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import ReactMarkdown from 'react-markdown'
 import remarkGfm from 'remark-gfm'
+import remarkBreaks from 'remark-breaks'
+import rehypeRaw from 'rehype-raw'
 import type { Article as ArticleType } from '../types'
 import { fetchArticle } from '../api/client'
+import TerminalBar from '../components/TerminalBar'
 
 export default function ArticlePage() {
   const { slug } = useParams<{ slug: string }>()
@@ -81,8 +84,13 @@ export default function ArticlePage() {
       </div>
 
       {/* Content */}
-      <div className="prose max-w-none">
-        <ReactMarkdown remarkPlugins={[remarkGfm]}>{article.content}</ReactMarkdown>
+      <div className="card-glow bg-geek-surface border border-geek-border rounded-lg overflow-hidden">
+        <TerminalBar title={`${article.slug}.md`} />
+        <div className="prose max-w-none p-5">
+          <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeRaw]}>
+            {article.content}
+          </ReactMarkdown>
+        </div>
       </div>
 
       {/* Back */}
