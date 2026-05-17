@@ -16,7 +16,7 @@ import (
 
 func main() {
 	cfg := config.Load()
-	database.Init(cfg.DBPath)
+	database.Init(cfg.DSN)
 
 	seed()
 
@@ -78,7 +78,7 @@ func seed() {
 	database.DB.Create(&models.Article{
 		Title:      "Building a Personal Site with React and Go",
 		Slug:       "building-a-personal-site-with-react-and-go",
-		Content:    "Here's how I built this site from scratch using React for the frontend and Go for the backend.\n\n## Architecture\n\n- **Frontend**: React + TypeScript + Vite + Tailwind CSS\n- **Backend**: Go + Gin + GORM + SQLite\n\n## Why this stack?\n\n1. **Go** is fast, simple, and perfect for REST APIs\n2. **React** gives us component-based UI with a rich ecosystem\n3. **SQLite** means zero-config deployment — no separate database server\n\n```tsx\n// A simple React component\nfunction App() {\n  return <h1>Hello, World!</h1>;\n}\n```\n\nThat's the beauty of it — simple tools, powerful results.",
+		Content:    "Here's how I built this site from scratch using React for the frontend and Go for the backend.\n\n## Architecture\n\n- **Frontend**: React + TypeScript + Vite + Tailwind CSS\n- **Backend**: Go + Gin + GORM + SQLite\n\n## Why this stack?\n\n1. **Go** is fast, simple, and perfect for REST APIs\n2. **React** gives us component-based UI with a rich ecosystem\n3. **MySQL** powers the backend — reliable and battle-tested\n\n```tsx\n// A simple React component\nfunction App() {\n  return <h1>Hello, World!</h1>;\n}\n```\n\nThat's the beauty of it — simple tools, powerful results.",
 		Excerpt:    "How I built this personal site from scratch using React for frontend and Go for backend.",
 		CategoryID: cat.ID,
 		Tags:       []models.Tag{tag2, tag3},

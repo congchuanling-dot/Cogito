@@ -3,8 +3,8 @@ package config
 import "os"
 
 type Config struct {
-	Port   string
-	DBPath string
+	DSN string
+	Port string
 }
 
 func Load() *Config {
@@ -12,9 +12,11 @@ func Load() *Config {
 	if port == "" {
 		port = "9090"
 	}
-	dbPath := os.Getenv("DB_PATH")
-	if dbPath == "" {
-		dbPath = "data/cogito.db"
+
+	dsn := os.Getenv("MYSQL_DSN")
+	if dsn == "" {
+		dsn = "root:123456@tcp(192.168.150.102:3306)/cogito?charset=utf8mb4&parseTime=True&loc=Local"
 	}
-	return &Config{Port: port, DBPath: dbPath}
+
+	return &Config{Port: port, DSN: dsn}
 }
