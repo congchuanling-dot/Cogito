@@ -1,4 +1,4 @@
-import type { Article, ArticleListResponse, Category, Tag } from '../types'
+import type { Article, ArticleListResponse, ArticleNeighborsResponse, Category, Tag } from '../types'
 
 const BASE = import.meta.env.DEV ? 'http://localhost:9090/api' : '/api'
 
@@ -20,6 +20,10 @@ export function fetchArticles(params: Record<string, string> = {}): Promise<Arti
 
 export function fetchArticle(slug: string): Promise<Article> {
   return request('GET', `/articles/${slug}`)
+}
+
+export function fetchArticleNeighbors(slug: string): Promise<ArticleNeighborsResponse> {
+  return request('GET', `/articles/${slug}/neighbors`)
 }
 
 export function searchArticles(q: string): Promise<{ articles: Article[]; total: number }> {

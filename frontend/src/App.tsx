@@ -4,6 +4,7 @@ import StarfieldBackground from './components/StarfieldBackground'
 import Home from './pages/Home'
 import ArticlePage from './pages/Article'
 import Search from './pages/Search'
+import About from './pages/About'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminArticleList from './pages/admin/ArticleList'
 import ArticleForm from './pages/admin/ArticleForm'
@@ -29,6 +30,7 @@ export default function App() {
           <Route path="/" element={<Home />} />
           <Route path="/article/:slug" element={<ArticlePage />} />
           <Route path="/search" element={<Search />} />
+          <Route path="/about" element={<About />} />
         </Route>
 
         {/* Admin */}

@@ -32,3 +32,15 @@ export interface ArticleListResponse {
   page: number
   limit: number
 }
+
+export interface ArticleNeighbor {
+  id: number
+  title: string
+  slug: string
+  created_at: string
+}
+
+export interface ArticleNeighborsResponse {
+  prev?: ArticleNeighbor
+  next?: ArticleNeighbor
+}

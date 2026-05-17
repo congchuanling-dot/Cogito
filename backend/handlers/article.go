@@ -208,6 +208,37 @@ func SearchArticles(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"articles": articles, "total": len(articles)})
 }
 
+type ArticleSummary struct {
+	ID        uint   `json:"id"`
+	Title     string `json:"title"`
+	Slug      string `json:"slug"`
+	CreatedAt string `json:"created_at"`
+}
+
+func GetArticleNeighbors(c *gin.Context) {
+	slugParam := c.Param("slug")
+	var article models.Article
+	if err := database.DB.Where("slug = ? AND published = ?", slugParam, true).First(&article).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "article not found"})
+		return
+	}
+
+	var prev, next models.Article
+	database.DB.Where("published = ? AND created_at < ?", true, article.CreatedAt).
+		Order("created_at DESC").Limit(1).First(&prev)
+	database.DB.Where("published = ? AND created_at > ?", true, article.CreatedAt).
+		Order("created_at ASC").Limit(1).First(&next)
+
+	result := gin.H{}
+	if prev.ID != 0 {
+		result["prev"] = ArticleSummary{ID: prev.ID, Title: prev.Title, Slug: prev.Slug, CreatedAt: prev.CreatedAt.Format("2006-01-02")}
+	}
+	if next.ID != 0 {
+		result["next"] = ArticleSummary{ID: next.ID, Title: next.Title, Slug: next.Slug, CreatedAt: next.CreatedAt.Format("2006-01-02")}
+	}
+	c.JSON(http.StatusOK, result)
+}
+
 func uniqueSlug(base string) string {
 	s := base
 	for i := 2; ; i++ {

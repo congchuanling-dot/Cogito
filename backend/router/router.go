@@ -18,6 +18,7 @@ func Setup() *gin.Engine {
 	{
 		api.GET("/articles", handlers.ListArticles)
 		api.GET("/articles/:slug", handlers.GetArticle)
+		api.GET("/articles/:slug/neighbors", handlers.GetArticleNeighbors)
 		api.POST("/articles", handlers.CreateArticle)
 		api.PUT("/articles/:id", handlers.UpdateArticle)
 		api.DELETE("/articles/:id", handlers.DeleteArticle)
