@@ -1,4 +1,4 @@
-import type { Article, ArticleListResponse, ArticleNeighborsResponse, Category, Tag } from '../types'
+import type { About, Article, ArticleListResponse, ArticleNeighborsResponse, Category, Tag } from '../types'
 
 const BASE = import.meta.env.DEV ? 'http://localhost:9090/api' : '/api'
 
@@ -63,4 +63,12 @@ export function updateArticle(id: number, data: {
 
 export function deleteArticle(id: number): Promise<void> {
   return request('DELETE', `/articles/${id}`)
+}
+
+export function fetchAbout(): Promise<About> {
+  return request('GET', '/about')
+}
+
+export function updateAbout(data: Partial<About>): Promise<About> {
+  return request('PUT', '/about', data)
 }

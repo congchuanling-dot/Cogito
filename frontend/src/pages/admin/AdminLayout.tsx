@@ -3,6 +3,7 @@ import { Link, Outlet, useLocation } from 'react-router-dom'
 const links = [
   { to: '/admin', label: 'Articles', icon: '$' },
   { to: '/admin/new', label: 'New Article', icon: '+' },
+  { to: '/admin/about', label: 'About Page', icon: '@' },
 ]
 
 export default function AdminLayout() {

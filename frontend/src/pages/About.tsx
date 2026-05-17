@@ -1,4 +1,38 @@
+import { useEffect, useState } from 'react'
+import { fetchAbout } from '../api/client'
+import type { About as AboutType } from '../types'
+
+const DEFAULT_SKILLS = ['Go', 'TypeScript', 'React', 'Python', 'Rust', 'PostgreSQL', 'Docker', 'Linux', 'Git']
+const DEFAULT_TIMELINE = [
+  { year: '2024', what: 'Building Cogito — a personal knowledge base' },
+  { year: '2023', what: 'Senior backend engineer — distributed systems' },
+  { year: '2021', what: 'Full-stack developer — React + Go microservices' },
+  { year: '2019', what: 'Started career — wrote first line of production Go' },
+]
+
+function parseJSON<T>(raw: string, fallback: T): T {
+  try { return JSON.parse(raw) } catch { return fallback }
+}
+
 export default function About() {
+  const [about, setAbout] = useState<AboutType | null>(null)
+
+  useEffect(() => {
+    fetchAbout().then(setAbout).catch(() => {})
+  }, [])
+
+  const name = about?.name || '从传领'
+  const title = about?.title || 'Software Engineer'
+  const bio = about?.bio || "Building things with code. Passionate about systems, open source, and the craft of software engineering."
+  const email = about?.email || 'congchuanling@gmail.com'
+  const githubUrl = about?.github_url || 'https://github.com/congchuanling'
+  const skills: string[] = about?.skills ? parseJSON(about.skills, DEFAULT_SKILLS) : DEFAULT_SKILLS
+  const timeline: { year: string; what: string }[] = about?.timeline ? parseJSON(about.timeline, DEFAULT_TIMELINE) : DEFAULT_TIMELINE
+
+  const links: { label: string; href: string }[] = []
+  if (githubUrl) links.push({ label: 'GitHub', href: githubUrl })
+  if (email) links.push({ label: 'Email', href: `mailto:${email}` })
+
   return (
     <div>
       {/* Header */}
@@ -15,26 +49,24 @@ export default function About() {
             <span className="text-3xl text-geek-accent/40 font-mono select-none">?</span>
           </div>
           <div className="flex-1 min-w-0">
-            <h2 className="text-xl font-semibold text-geek-text-h font-mono mb-1">从传领</h2>
-            <p className="text-xs text-geek-accent font-mono mb-3">Software Engineer</p>
-            <p className="text-sm text-geek-text leading-relaxed">
-              Building things with code. Passionate about systems, open source,
-              and the craft of software engineering.
-            </p>
-            <div className="flex flex-wrap gap-2 mt-4">
-              {[
-                { label: 'GitHub', href: 'https://github.com' },
-                { label: 'Email', href: 'mailto:hello@example.com' },
-              ].map((link) => (
-                <a
-                  key={link.label}
-                  href={link.href}
-                  className="text-[11px] px-2.5 py-1 rounded border border-geek-border text-geek-text no-underline hover:text-geek-accent hover:border-geek-accent/40 transition-colors font-mono"
-                >
-                  &gt; {link.label}
-                </a>
-              ))}
-            </div>
+            <h2 className="text-xl font-semibold text-geek-text-h font-mono mb-1">{name}</h2>
+            <p className="text-xs text-geek-accent font-mono mb-3">{title}</p>
+            <p className="text-sm text-geek-text leading-relaxed">{bio}</p>
+            {links.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-4">
+                {links.map((link) => (
+                  <a
+                    key={link.label}
+                    href={link.href}
+                    target={link.label === 'GitHub' ? '_blank' : undefined}
+                    rel={link.label === 'GitHub' ? 'noopener noreferrer' : undefined}
+                    className="text-[11px] px-2.5 py-1 rounded border border-geek-border text-geek-text no-underline hover:text-geek-accent hover:border-geek-accent/40 transition-colors font-mono"
+                  >
+                    &gt; {link.label}
+                  </a>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -45,10 +77,7 @@ export default function About() {
           <span className="text-geek-accent/60">$</span> cat ~/.skills
         </h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-          {[
-            'Go', 'TypeScript', 'React', 'Python', 'Rust',
-            'PostgreSQL', 'Docker', 'Linux', 'Git',
-          ].map((skill) => (
+          {skills.map((skill) => (
             <div
               key={skill}
               className="px-3 py-2 bg-geek-surface border border-geek-border rounded text-xs text-geek-text font-mono hover:border-geek-accent/30 hover:text-geek-text-h transition-colors"
@@ -60,24 +89,21 @@ export default function About() {
       </div>
 
       {/* Timeline */}
-      <div className="mb-8">
-        <h2 className="text-lg font-semibold text-geek-text-h font-mono mb-4">
-          <span className="text-geek-accent/60">$</span> cat ~/.history
-        </h2>
-        <div className="space-y-0">
-          {[
-            { year: '2024', what: 'Building Cogito — a personal knowledge base' },
-            { year: '2023', what: 'Senior backend engineer — distributed systems' },
-            { year: '2021', what: 'Full-stack developer — React + Go microservices' },
-            { year: '2019', what: 'Started career — wrote first line of production Go' },
-          ].map((item, i) => (
-            <div key={i} className="flex gap-4 py-3 border-b border-geek-border last:border-0">
-              <span className="text-geek-accent text-xs font-mono shrink-0 w-12">{item.year}</span>
-              <span className="text-sm text-geek-text">{item.what}</span>
-            </div>
-          ))}
+      {timeline.length > 0 && (
+        <div className="mb-8">
+          <h2 className="text-lg font-semibold text-geek-text-h font-mono mb-4">
+            <span className="text-geek-accent/60">$</span> cat ~/.history
+          </h2>
+          <div className="space-y-0">
+            {timeline.map((item, i) => (
+              <div key={i} className="flex gap-4 py-3 border-b border-geek-border last:border-0">
+                <span className="text-geek-accent text-xs font-mono shrink-0 w-12">{item.year}</span>
+                <span className="text-sm text-geek-text">{item.what}</span>
+              </div>
+            ))}
+          </div>
         </div>
-      </div>
+      )}
     </div>
   )
 }

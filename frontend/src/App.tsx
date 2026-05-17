@@ -1,13 +1,17 @@
+import { lazy, Suspense } from 'react'
 import { BrowserRouter, Routes, Route, Outlet } from 'react-router-dom'
 import Sidebar from './components/Sidebar'
 import StarfieldBackground from './components/StarfieldBackground'
+import ErrorBoundary from './components/ErrorBoundary'
 import Home from './pages/Home'
 import ArticlePage from './pages/Article'
 import Search from './pages/Search'
 import About from './pages/About'
 import AdminLayout from './pages/admin/AdminLayout'
 import AdminArticleList from './pages/admin/ArticleList'
-import ArticleForm from './pages/admin/ArticleForm'
+import AboutEditor from './pages/admin/AboutEditor'
+
+const ArticleForm = lazy(() => import('./pages/admin/ArticleForm'))
 
 function PublicLayout() {
   return (
@@ -27,7 +31,8 @@ export default function App() {
       <Routes>
         {/* Public */}
         <Route element={<PublicLayout />}>
-          <Route path="/" element={<Home />} />
+          <Route path="/" element={<About />} />
+          <Route path="/articles" element={<Home />} />
           <Route path="/article/:slug" element={<ArticlePage />} />
           <Route path="/search" element={<Search />} />
           <Route path="/about" element={<About />} />
@@ -36,8 +41,9 @@ export default function App() {
         {/* Admin */}
         <Route path="/admin" element={<AdminLayout />}>
           <Route index element={<AdminArticleList />} />
-          <Route path="new" element={<ArticleForm />} />
-          <Route path="edit/:slug" element={<ArticleForm />} />
+          <Route path="new" element={<ErrorBoundary><Suspense fallback={<div className="text-geek-text text-sm py-12 text-center"><span className="animate-pulse">&gt;</span> Loading editor...</div>}><ArticleForm /></Suspense></ErrorBoundary>} />
+          <Route path="edit/:slug" element={<ErrorBoundary><Suspense fallback={<div className="text-geek-text text-sm py-12 text-center"><span className="animate-pulse">&gt;</span> Loading editor...</div>}><ArticleForm /></Suspense></ErrorBoundary>} />
+          <Route path="about" element={<AboutEditor />} />
         </Route>
       </Routes>
     </BrowserRouter>

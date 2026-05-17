@@ -44,3 +44,15 @@ export interface ArticleNeighborsResponse {
   prev?: ArticleNeighbor
   next?: ArticleNeighbor
 }
+
+export interface About {
+  id: number
+  name: string
+  title: string
+  bio: string
+  github_url: string
+  email: string
+  skills: string
+  timeline: string
+  updated_at: string
+}

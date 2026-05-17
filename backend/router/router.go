@@ -23,6 +23,8 @@ func Setup() *gin.Engine {
 		api.PUT("/articles/:id", handlers.UpdateArticle)
 		api.DELETE("/articles/:id", handlers.DeleteArticle)
 		api.GET("/search", handlers.SearchArticles)
+		api.GET("/about", handlers.GetAbout)
+		api.PUT("/about", handlers.UpdateAbout)
 		api.GET("/categories", handlers.ListCategories)
 		api.GET("/tags", handlers.ListTags)
 	}

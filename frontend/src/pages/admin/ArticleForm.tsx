@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import ReactMarkdown from 'react-markdown'
-import remarkGfm from 'remark-gfm'
-import remarkBreaks from 'remark-breaks'
-import rehypeRaw from 'rehype-raw'
+import { BlockNoteView } from '@blocknote/mantine'
+import { BlockNoteEditor } from '@blocknote/core'
+import { marked } from 'marked'
+import TurndownService from 'turndown'
+import '@blocknote/mantine/style.css'
 import type { Category, Tag } from '../../types'
 import {
   fetchArticle,
@@ -12,7 +13,63 @@ import {
   createArticle,
   updateArticle,
 } from '../../api/client'
-import MarkdownEditor from '../../components/MarkdownEditor'
+
+const turndown = new TurndownService({ headingStyle: 'atx', codeBlockStyle: 'fenced' })
+
+function EditorWrapper({
+  initialMarkdown,
+  onReady,
+}: {
+  initialMarkdown: string
+  onReady: (getMarkdown: () => Promise<string>) => void
+}) {
+  const [editor, setEditor] = useState<BlockNoteEditor | null>(null)
+  const [initError, setInitError] = useState<string | null>(null)
+  const readyRef = useRef(false)
+
+  useEffect(() => {
+    if (readyRef.current) return
+    readyRef.current = true
+
+    try {
+      const ed = BlockNoteEditor.create() as BlockNoteEditor
+      if (window) {
+        (window as any).ProseMirror = (ed as any)._tiptapEditor
+      }
+      setEditor(ed)
+
+      onReady(async () => {
+        const html = await ed.blocksToHTMLLossy(ed.document)
+        return turndown.turndown(html)
+      })
+
+      if (initialMarkdown) {
+        const html = marked.parse(initialMarkdown) as string
+        ed.tryParseHTMLToBlocks(html)
+      }
+    } catch (e: any) {
+      setInitError(e.message || 'Unknown error')
+    }
+  }, []) // eslint-disable-line react-hooks/exhaustive-deps
+
+  if (initError) {
+    throw new Error(`BlockNote init failed: ${initError}`)
+  }
+
+  if (!editor) {
+    return (
+      <div className="bg-geek-surface border border-geek-border rounded-lg p-8 text-center text-geek-text text-sm">
+        <span className="animate-pulse text-geek-accent">&gt;</span> Loading editor...
+      </div>
+    )
+  }
+
+  return (
+    <div className="border border-geek-border rounded-lg overflow-hidden">
+      <BlockNoteView editor={editor} theme="dark" />
+    </div>
+  )
+}
 
 export default function ArticleForm() {
   const { slug } = useParams<{ slug: string }>()
@@ -21,16 +78,23 @@ export default function ArticleForm() {
   const navigate = useNavigate()
 
   const [title, setTitle] = useState('')
-  const [content, setContent] = useState('')
+  const [initialMarkdown, setInitialMarkdown] = useState('')
   const [excerpt, setExcerpt] = useState('')
   const [categoryId, setCategoryId] = useState<number>(0)
   const [tagIds, setTagIds] = useState<number[]>([])
   const [published, setPublished] = useState(false)
+  const [editorKey, setEditorKey] = useState(0)
 
   const [categories, setCategories] = useState<Category[]>([])
   const [tags, setTags] = useState<Tag[]>([])
   const [saving, setSaving] = useState(false)
   const [loading, setLoading] = useState(false)
+
+  const getMarkdownRef = useRef<(() => Promise<string>) | null>(null)
+
+  const handleEditorReady = useCallback((getMarkdown: () => Promise<string>) => {
+    getMarkdownRef.current = getMarkdown
+  }, [])
 
   useEffect(() => {
     fetchCategories().then(setCategories)
@@ -42,13 +106,23 @@ export default function ArticleForm() {
         .then((a) => {
           setArticleId(a.id)
           setTitle(a.title)
-          setContent(a.content)
+          setInitialMarkdown(a.content)
           setExcerpt(a.excerpt || '')
           setCategoryId(a.category_id || 0)
           setTagIds(a.tags?.map((t) => t.id) || [])
           setPublished(a.published)
+          setEditorKey((k) => k + 1) // remount editor with new content
         })
         .finally(() => setLoading(false))
+    } else {
+      setArticleId(null)
+      setTitle('')
+      setInitialMarkdown('')
+      setExcerpt('')
+      setCategoryId(0)
+      setTagIds([])
+      setPublished(false)
+      setEditorKey((k) => k + 1)
     }
   }, [slug, isEdit])
 
@@ -60,9 +134,18 @@ export default function ArticleForm() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    if (!title || !content) return
+    if (!title) return
     setSaving(true)
     try {
+      let content = ''
+      if (getMarkdownRef.current) {
+        content = await getMarkdownRef.current()
+      }
+      if (!content.trim()) {
+        alert('Content is required')
+        setSaving(false)
+        return
+      }
       const data = { title, content, excerpt, category_id: categoryId, tag_ids: tagIds, published }
       if (isEdit && articleId) {
         await updateArticle(articleId, data)
@@ -78,13 +161,17 @@ export default function ArticleForm() {
   }
 
   if (loading) {
-    return <div className="text-geek-text text-sm py-12 text-center"><span className="animate-pulse">&gt;</span> Loading...</div>
+    return (
+      <div className="text-geek-text text-sm py-12 text-center">
+        <span className="animate-pulse">&gt;</span> Loading...
+      </div>
+    )
   }
 
   return (
     <div>
       <h1 className="text-xl font-semibold text-geek-text-h font-mono mb-6">
-        {isEdit ? `Edit: ${title}` : 'New Article'}
+        {isEdit ? `Edit: ${title || 'Untitled'}` : 'New Article'}
       </h1>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -113,30 +200,23 @@ export default function ArticleForm() {
           />
         </div>
 
-        {/* Content — split-pane WYSIWYG */}
+        {/* Content — BlockNote Notion-style editor */}
         <div>
           <label className="block text-xs text-geek-text font-mono mb-1.5">Content</label>
-          <div className="grid grid-cols-2 gap-3" style={{ height: '500px' }}>
-            {/* Editor */}
-            <div className="overflow-hidden rounded-lg">
-              <MarkdownEditor value={content} onChange={setContent} />
-            </div>
-            {/* Live preview */}
-            <div className="prose max-w-none bg-geek-surface border border-geek-border rounded-lg p-4 overflow-y-auto">
-              {content ? (
-                <ReactMarkdown remarkPlugins={[remarkGfm, remarkBreaks]} rehypePlugins={[rehypeRaw]}>
-                  {content}
-                </ReactMarkdown>
-              ) : (
-                <p className="text-geek-text/40 text-sm italic font-mono">Start typing to preview...</p>
-              )}
-            </div>
-          </div>
+          <EditorWrapper
+            key={editorKey}
+            initialMarkdown={initialMarkdown}
+            onReady={handleEditorReady}
+          />
+          <p className="text-[10px] text-geek-text/40 mt-1 font-mono">
+            Type <span className="text-geek-accent/60">/</span> for block commands &middot;
+            Drag the <span className="text-geek-accent/60">⋮⋮</span> handle to reorder &middot;
+            Select text for formatting
+          </p>
         </div>
 
         {/* Meta row */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Category */}
           <div>
             <label className="block text-xs text-geek-text font-mono mb-1.5">Category</label>
             <select
@@ -151,7 +231,6 @@ export default function ArticleForm() {
             </select>
           </div>
 
-          {/* Published toggle */}
           <div className="flex items-end pb-1">
             <label className="flex items-center gap-2 cursor-pointer">
               <input

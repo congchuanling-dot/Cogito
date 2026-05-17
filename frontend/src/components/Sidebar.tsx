@@ -52,10 +52,9 @@ export default function Sidebar() {
       {/* Nav */}
       <nav className="flex flex-col gap-1 mb-6">
         <div className="text-[10px] text-geek-text tracking-[0.2em] mb-1 uppercase px-2">Navigation</div>
-        <NavLink to="/" label="~/articles" active={location.pathname === '/'} />
-        <NavLink to="/about" label="~/about" active={location.pathname === '/about'} />
+        <NavLink to="/" label="~/about" active={location.pathname === '/' || location.pathname === '/about'} />
+        <NavLink to="/articles" label="~/articles" active={location.pathname === '/articles'} />
         <NavLink to="/search" label="~/search" active={location.pathname === '/search'} />
-        <NavLink to="/admin" label="~/admin" active={location.pathname.startsWith('/admin')} />
       </nav>
 
       {/* Categories */}
