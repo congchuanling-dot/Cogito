@@ -1,0 +1,44 @@
+@import 'tailwindcss';
+
+@theme {
+  --font-mono: 'JetBrains Mono', 'Fira Code', 'Cascadia Code', 'IBM Plex Mono', ui-monospace, monospace;
+  --color-geek-bg: #0a0a0c;
+  --color-geek-surface: #131418;
+  --color-geek-border: #1e1f25;
+  --color-geek-accent: #22d3a0;
+  --color-geek-accent-dim: rgba(34, 211, 160, 0.12);
+  --color-geek-text: #9ca3af;
+  --color-geek-text-h: #e5e7eb;
+}
+
+body {
+  margin: 0;
+  background: var(--color-geek-bg);
+  color: var(--color-geek-text);
+  font-family: var(--font-mono);
+  font-size: 15px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--color-geek-border); border-radius: 3px; }
+
+/* Markdown content styling */
+.prose h1 { font-size: 1.75rem; font-weight: 600; color: var(--color-geek-text-h); margin: 1.5em 0 0.5em; }
+.prose h2 { font-size: 1.3rem; font-weight: 600; color: var(--color-geek-text-h); margin: 1.5em 0 0.5em; border-bottom: 1px solid var(--color-geek-border); padding-bottom: 0.25em; }
+.prose h3 { font-size: 1.1rem; font-weight: 600; color: var(--color-geek-text-h); margin: 1.2em 0 0.4em; }
+.prose p { margin: 0.75em 0; }
+.prose a { color: var(--color-geek-accent); text-decoration: none; }
+.prose a:hover { text-decoration: underline; }
+.prose blockquote { border-left: 3px solid var(--color-geek-accent); margin: 1em 0; padding: 0.25em 1em; color: var(--color-geek-text); font-style: italic; background: var(--color-geek-accent-dim); border-radius: 0 4px 4px 0; }
+.prose code { font-size: 0.85em; background: var(--color-geek-surface); padding: 2px 6px; border-radius: 3px; color: var(--color-geek-accent); }
+.prose pre { background: var(--color-geek-surface); padding: 1em; border-radius: 6px; overflow-x: auto; margin: 1em 0; border: 1px solid var(--color-geek-border); }
+.prose pre code { background: none; padding: 0; color: var(--color-geek-text-h); }
+.prose ul, .prose ol { padding-left: 1.5em; margin: 0.5em 0; }
+.prose li { margin: 0.25em 0; }
+.prose strong { color: var(--color-geek-text-h); }
+.prose hr { border: none; border-top: 1px solid var(--color-geek-border); margin: 2em 0; }
+.prose img { max-width: 100%; border-radius: 6px; }

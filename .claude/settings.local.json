@@ -1,0 +1,29 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Get-ChildItem -Name)",
+      "Bash(go build *)",
+      "Bash(npm create *)",
+      "Bash(npm install *)",
+      "Bash(curl -s http://localhost:8080/api/articles)",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\(f'Total articles: {d[\\\\\"total\\\\\"]}'\\); [print\\(f'  [{a[\\\\\"id\\\\\"]}] {a[\\\\\"title\\\\\"]}'\\) for a in d['articles']]\")",
+      "Bash(taskkill //F //IM go.exe)",
+      "Bash(taskkill //F //IM main.exe)",
+      "Bash(netstat -ano)",
+      "Bash(taskkill /F /PID 11732)",
+      "Bash(go run *)",
+      "Bash(npm run *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(start http://localhost:5173)",
+      "Bash(curl -s http://localhost:5173/api/articles)",
+      "Bash(curl -v http://localhost:5173/api/articles)",
+      "Bash(curl -s http://localhost:5174/api/articles)",
+      "Bash(npx vite *)",
+      "Bash(curl -s -I http://localhost:5174/)",
+      "Bash(curl -s -I http://localhost:8080/api/articles)",
+      "Bash(curl -s http://localhost:5174/)",
+      "Bash(cmd //c \"taskkill /F /PID 11732\")",
+      "Bash(curl -s http://localhost:9090/api/articles)"
+    ]
+  }
+}
